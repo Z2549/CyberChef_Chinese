@@ -125,7 +125,10 @@ module.exports = {
         browser.waitForElementVisible("#input-text .cm-status-bar .stats-lines-value")
             .expect.element("#input-text .cm-status-bar .stats-lines-value").text.to.equal("1");
         browser.waitForElementVisible("#input-text .cm-status-bar .chr-enc-value")
-            .expect.element("#input-text .cm-status-bar .chr-enc-value").text.to.equal("Raw Bytes");
+            // 汉化改动：未做编码转换时的显示名由 statusBar.mjs 的 RAW_BYTES_ZH 提供。
+            // 下拉列表里形如 "UTF-8" / "Simplified Chinese GBK" 的条目是真实字符集名，
+            // 保持英文（browserUtils.setChrEnc 也用 link text 定位它们），只有这一项被汉化。
+            .expect.element("#input-text .cm-status-bar .chr-enc-value").text.to.equal("原始字节");
         browser.waitForElementVisible("#input-text .cm-status-bar .eol-value")
             .expect.element("#input-text .cm-status-bar .eol-value").text.to.equal("LF");
 
@@ -138,7 +141,7 @@ module.exports = {
         browser.waitForElementVisible("#output-text .cm-status-bar .baking-time-info")
             .expect.element("#output-text .cm-status-bar .baking-time-info").text.to.contain("ms");
         browser.waitForElementVisible("#output-text .cm-status-bar .chr-enc-value")
-            .expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("Raw Bytes");
+            .expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("原始字节");
         browser.waitForElementVisible("#output-text .cm-status-bar .eol-value")
             .expect.element("#output-text .cm-status-bar .eol-value").text.to.equal("LF");
     },
@@ -149,13 +152,13 @@ module.exports = {
 
         browser.expect.element("#input-text .cm-status-bar .stats-length-value").text.to.equal("301");
         browser.expect.element("#input-text .cm-status-bar .stats-lines-value").text.to.equal("3");
-        browser.expect.element("#input-text .cm-status-bar .chr-enc-value").text.to.equal("Raw Bytes");
+        browser.expect.element("#input-text .cm-status-bar .chr-enc-value").text.to.equal("原始字节");
         browser.expect.element("#input-text .cm-status-bar .eol-value").text.to.equal("LF");
 
         browser.expect.element("#output-text .cm-status-bar .stats-length-value").text.to.equal("0");
         browser.expect.element("#output-text .cm-status-bar .stats-lines-value").text.to.equal("1");
         browser.expect.element("#output-text .cm-status-bar .baking-time-info").text.to.contain("ms");
-        browser.expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("Raw Bytes");
+        browser.expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("原始字节");
         browser.expect.element("#output-text .cm-status-bar .eol-value").text.to.equal("LF");
 
         /* Output updates correctly */
@@ -163,7 +166,7 @@ module.exports = {
         browser.expect.element("#output-text .cm-status-bar .stats-length-value").text.to.equal("301");
         browser.expect.element("#output-text .cm-status-bar .stats-lines-value").text.to.equal("3");
         browser.expect.element("#output-text .cm-status-bar .baking-time-info").text.to.contain("ms");
-        browser.expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("Raw Bytes");
+        browser.expect.element("#output-text .cm-status-bar .chr-enc-value").text.to.equal("原始字节");
         browser.expect.element("#output-text .cm-status-bar .eol-value").text.to.equal("LF");
     },
 
@@ -453,8 +456,8 @@ module.exports = {
         browser
             .click("#btn-new-tab")
             .waitForElementVisible("#input-tabs li:nth-of-type(2).active-input-tab");
-        browser.expect.element("#input-text .chr-enc-value").text.that.equals("Raw Bytes");
-        browser.expect.element("#output-text .chr-enc-value").text.that.equals("Raw Bytes");
+        browser.expect.element("#input-text .chr-enc-value").text.that.equals("原始字节");
+        browser.expect.element("#output-text .chr-enc-value").text.that.equals("原始字节");
 
         utils.setChrEnc(browser, "input", "UTF-7");
         utils.setChrEnc(browser, "output", "UTF-7");

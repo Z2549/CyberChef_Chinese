@@ -161,6 +161,12 @@ class BindingsWaiter {
 
     /**
      * Updates keybinding list when metaKey option is toggled
+     *
+     * 汉化说明：本表整张由 JS 模板字符串写入 #keybList（见 index.html 的“快捷键”标签页），
+     * 因此模板里的文案必须在这里改，改 index.html 无效。
+     * 表中只汉化“操作说明”一列；修饰键名（Alt / Opt / Win / Cmd）、键位（f / i / o / Space /
+     * RightArrow …）以及 F1 都属于写进 parseInput() 的 switch(e.code) 分支的键位标识，
+     * 必须保持英文，否则与真实按键对不上。
      */
     updateKeybList() {
         let modWinLin = "Alt";
@@ -171,96 +177,96 @@ class BindingsWaiter {
         }
         document.getElementById("keybList").innerHTML = `
         <tr>
-            <th>Command</th>
-            <th>Shortcut (Win/Linux)</th>
-            <th>Shortcut (Mac)</th>
+            <th>操作</th>
+            <th>快捷键（Win / Linux）</th>
+            <th>快捷键（Mac）</th>
         </tr>
         <tr>
-            <td>Activate contextual help</td>
+            <td>激活上下文帮助</td>
             <td>F1</td>
             <td>F1</td>
         </tr>
         <tr>
-            <td>Place cursor in search field</td>
+            <td>将光标置于搜索框</td>
             <td>Ctrl+${modWinLin}+f</td>
             <td>Ctrl+${modMac}+f</td>
         <tr>
-            <td>Place cursor in input box</td>
+            <td>将光标置于输入框</td>
             <td>Ctrl+${modWinLin}+i</td>
             <td>Ctrl+${modMac}+i</td>
         </tr>
         <tr>
-            <td>Place cursor in output box</td>
+            <td>将光标置于输出框</td>
             <td>Ctrl+${modWinLin}+o</td>
             <td>Ctrl+${modMac}+o</td>
         </tr>
         <tr>
-            <td>Place cursor in first argument field of the next operation in the recipe</td>
+            <td>将光标置于配方中下一个操作的第一个参数框</td>
             <td>Ctrl+${modWinLin}+.</td>
             <td>Ctrl+${modMac}+.</td>
         </tr>
         <tr>
-            <td>Place cursor in first argument field of the nth operation in the recipe</td>
+            <td>将光标置于配方中第 n 个操作的第一个参数框</td>
             <td>Ctrl+${modWinLin}+[1-9]</td>
             <td>Ctrl+${modMac}+[1-9]</td>
         </tr>
         <tr>
-            <td>Disable current operation</td>
+            <td>禁用当前操作</td>
             <td>Ctrl+${modWinLin}+d</td>
             <td>Ctrl+${modMac}+d</td>
         </tr>
         <tr>
-            <td>Set/clear breakpoint</td>
+            <td>设置 / 清除断点</td>
             <td>Ctrl+${modWinLin}+b</td>
             <td>Ctrl+${modMac}+b</td>
         </tr>
         <tr>
-            <td>Bake</td>
+            <td>烘焙</td>
             <td>Ctrl+${modWinLin}+Space</td>
             <td>Ctrl+${modMac}+Space</td>
         </tr>
         <tr>
-            <td>Step</td>
+            <td>单步执行</td>
             <td>Ctrl+${modWinLin}+'</td>
             <td>Ctrl+${modMac}+'</td>
         </tr>
         <tr>
-            <td>Clear recipe</td>
+            <td>清空配方</td>
             <td>Ctrl+${modWinLin}+c</td>
             <td>Ctrl+${modMac}+c</td>
         </tr>
         <tr>
-            <td>Save to file</td>
+            <td>保存到文件</td>
             <td>Ctrl+${modWinLin}+s</td>
             <td>Ctrl+${modMac}+s</td>
         </tr>
         <tr>
-            <td>Load recipe</td>
+            <td>加载配方</td>
             <td>Ctrl+${modWinLin}+l</td>
             <td>Ctrl+${modMac}+l</td>
         </tr>
         <tr>
-            <td>Move output to input</td>
+            <td>将输出移至输入</td>
             <td>Ctrl+${modWinLin}+m</td>
             <td>Ctrl+${modMac}+m</td>
         </tr>
         <tr>
-            <td>Create a new tab</td>
+            <td>新建标签页</td>
             <td>Ctrl+${modWinLin}+t</td>
             <td>Ctrl+${modMac}+t</td>
         </tr>
         <tr>
-            <td>Close the current tab</td>
+            <td>关闭当前标签页</td>
             <td>Ctrl+${modWinLin}+w</td>
             <td>Ctrl+${modMac}+w</td>
         </tr>
         <tr>
-            <td>Go to next tab</td>
+            <td>切换到下一个标签页</td>
             <td>Ctrl+${modWinLin}+RightArrow</td>
             <td>Ctrl+${modMac}+RightArrow</td>
         </tr>
         <tr>
-            <td>Go to previous tab</td>
+            <td>切换到上一个标签页</td>
             <td>Ctrl+${modWinLin}+LeftArrow</td>
             <td>Ctrl+${modMac}+LeftArrow</td>
         </tr>
@@ -286,6 +292,10 @@ class BindingsWaiter {
     /**
      * Displays the help pane populated with help text associated with the given element
      *
+     * 汉化说明：这里的“Help topic”标签是帮助弹窗的固定前缀，属于界面文案，故一并汉化。
+     * 弹窗内容本身来自各元素的 data-help / data-help-title，已在 index.html 与各组件的
+     * 渲染层汉化。
+     *
      * @param {Element} el
      */
     displayHelp(el) {
@@ -293,9 +303,9 @@ class BindingsWaiter {
         let helpTitle = el.getAttribute("data-help-title");
 
         if (helpTitle)
-            helpTitle = "<span class='text-muted'>Help topic:</span> " + helpTitle;
+            helpTitle = "<span class='text-muted'>帮助主题：</span> " + helpTitle;
         else
-            helpTitle = "<span class='text-muted'>Help topic</span>";
+            helpTitle = "<span class='text-muted'>帮助主题</span>";
 
         document.querySelector("#help-modal .modal-body").innerHTML = helpText;
         document.querySelector("#help-modal #help-title").innerHTML = helpTitle;

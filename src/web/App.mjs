@@ -302,12 +302,12 @@ class App {
         // Add edit button to first category (Favourites)
         const favCat = document.querySelector("#categories a");
         favCat.appendChild(document.getElementById("edit-favourites"));
-        favCat.setAttribute("data-help-title", "Favourite operations");
-        favCat.setAttribute("data-help", `<p>This category displays your favourite operations.</p>
+        favCat.setAttribute("data-help-title", "收藏");
+        favCat.setAttribute("data-help", `<p>此分类显示您收藏的操作。</p>
         <ul>
-            <li><b>To add:</b> drag an operation over the Favourites category</li>
-            <li><b>To reorder:</b> Click on the 'Edit favourites' button and drag operations up and down in the list provided</li>
-            <li><b>To remove:</b> Click on the 'Edit favourites' button and hit the delete button next to the operation you want to remove</li>
+            <li><b>添加：</b>把一个操作拖到「收藏」分类上</li>
+            <li><b>重新排序：</b>点击「编辑收藏」按钮，在弹出列表中上下拖动操作</li>
+            <li><b>移除：</b>点击「编辑收藏」按钮，再点击要移除的操作旁的删除按钮</li>
         </ul>`);
     }
 
