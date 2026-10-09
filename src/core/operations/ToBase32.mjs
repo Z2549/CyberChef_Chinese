@@ -1,0 +1,103 @@
+/**
+ * @author n1474335 [n1474335@gmail.com]
+ * @copyright Crown Copyright 2016
+ * @license Apache-2.0
+ */
+
+import Operation from "../Operation.mjs";
+import Utils from "../Utils.mjs";
+import {ALPHABET_OPTIONS} from "../lib/Base32.mjs";
+
+/**
+ * To Base32 operation
+ */
+class ToBase32 extends Operation {
+
+    /**
+     * ToBase32 constructor
+     */
+    constructor() {
+        super();
+
+        this.name = "To Base32";
+        this.module = "Default";
+        this.description =   "Base32是一种使用一组有限的符号对任意字节数据进行编码的表示法，这些符号可以方便地由人类使用并由计算机处理。它使用比Base64更小的字符集，通常是大写字母和数字2到7。";
+        this.infoURL = "https://wikipedia.org/wiki/Base32";
+        this.inputType = "ArrayBuffer";
+        this.outputType = "string";
+        this.args = [
+            {
+                name: "Alphabet",
+                type: "editableOption",
+                value: ALPHABET_OPTIONS
+            }
+        ];
+    }
+
+    /**
+     * @param {ArrayBuffer} input
+     * @param {Object[]} args
+     * @returns {string}
+     */
+    run(input, args) {
+        if (!input) return "";
+        input = new Uint8Array(input);
+
+        const alphabet = args[0] ?
+            Utils.expandAlphRange(args[0]).join("") :
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=";
+
+        // Unicode-safe alphabet handling
+        // Supports BMP + non-BMP characters (emoji, Mahjong tiles, etc.)
+        const alphabetChars = Array.from(alphabet);
+
+        let output = "",
+            chr1, chr2, chr3, chr4, chr5,
+            enc1, enc2, enc3, enc4, enc5, enc6, enc7, enc8,
+            i = 0;
+        while (i < input.length) {
+            chr1 = input[i++];
+            chr2 = input[i++];
+            chr3 = input[i++];
+            chr4 = input[i++];
+            chr5 = input[i++];
+
+            enc1 = chr1 >> 3;
+            enc2 = ((chr1 & 7) << 2) | (chr2 >> 6);
+            enc3 = (chr2 >> 1) & 31;
+            enc4 = ((chr2 & 1) << 4) | (chr3 >> 4);
+            enc5 = ((chr3 & 15) << 1) | (chr4 >> 7);
+            enc6 = (chr4 >> 2) & 31;
+            enc7 = ((chr4 & 3) << 3) | (chr5 >> 5);
+            enc8 = chr5 & 31;
+
+            if (isNaN(chr2)) {
+                enc3 = enc4 = enc5 = enc6 = enc7 = enc8 = 32;
+            } else if (isNaN(chr3)) {
+                enc5 = enc6 = enc7 = enc8 = 32;
+            } else if (isNaN(chr4)) {
+                enc6 = enc7 = enc8 = 32;
+            } else if (isNaN(chr5)) {
+                enc8 = 32;
+            }
+
+            // Preserve original charAt() behavior:
+            // out-of-range indexes return ""
+            output +=
+                (alphabetChars[enc1] || "") +
+                (alphabetChars[enc2] || "") +
+                (alphabetChars[enc3] || "") +
+                (alphabetChars[enc4] || "") +
+                (alphabetChars[enc5] || "") +
+                (alphabetChars[enc6] || "") +
+                (alphabetChars[enc7] || "") +
+                (alphabetChars[enc8] || "");
+        }
+
+        return output;
+    }
+
+}
+
+export default ToBase32;
+

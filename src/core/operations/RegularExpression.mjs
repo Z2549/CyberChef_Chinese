@@ -1,0 +1,281 @@
+/**
+ * @author n1474335 [n1474335@gmail.com]
+ * @copyright Crown Copyright 2018
+ * @license Apache-2.0
+ */
+
+import XRegExp from "xregexp";
+import Operation from "../Operation.mjs";
+import Utils from "../Utils.mjs";
+import { EMAIL_REGEX } from "../lib/Extract.mjs";
+import OperationError from "../errors/OperationError.mjs";
+
+/**
+ * Regular expression operation
+ */
+class RegularExpression extends Operation {
+
+    /**
+     * RegularExpression constructor
+     */
+    constructor() {
+        super();
+
+        this.name = "Regular expression";
+        this.module = "Regex";
+        this.description =  "自定义正则表达式（regex）来搜索输入数据，也可选择预定义模式列表中的一项。<br><br>支持扩展正则语法，包括“点号匹配全部”标志、命名捕获组、完整的 Unicode 覆盖（含 <code>\\p{}</code> 类别与文字系统，以及辅助平面码位）和递归匹配。";
+        this.infoURL = "https://wikipedia.org/wiki/Regular_expression";
+        this.inputType = "string";
+        this.outputType = "html";
+        this.args = [
+            {
+                "name": "Built in regexes",
+                "type": "populateOption",
+                "value": [
+                    {
+                        name: "User defined",
+                        value: ""
+                    },
+                    {
+                        name: "IPv4 address",
+                        value: "(?:(?:\\d|[01]?\\d\\d|2[0-4]\\d|25[0-5])\\.){3}(?:25[0-5]|2[0-4]\\d|[01]?\\d\\d|\\d)(?:\\/\\d{1,2})?"
+                    },
+                    {
+                        name: "IPv6 address",
+                        value: "((?=.*::)(?!.*::.+::)(::)?([\\dA-Fa-f]{1,4}:(:|\\b)|){5}|([\\dA-Fa-f]{1,4}:){6})((([\\dA-Fa-f]{1,4}((?!\\3)::|:\\b|(?![\\dA-Fa-f])))|(?!\\2\\3)){2}|(((2[0-4]|1\\d|[1-9])?\\d|25[0-5])\\.?\\b){4})"
+                    },
+                    {
+                        name: "Email address",
+                        value: EMAIL_REGEX.source // We use a different regex library, so just take the source regex string here
+                    },
+                    {
+                        name: "URL",
+                        value: "([A-Za-z]+://)([-\\w]+(?:\\.\\w[-\\w]*)+)(:\\d+)?(/[^.!,?\"<>\\[\\]{}\\s\\x7F-\\xFF]*(?:[.!,?]+[^.!,?\"<>\\[\\]{}\\s\\x7F-\\xFF]+)*)?"
+                    },
+                    {
+                        name: "Domain",
+                        value: "\\b((?=[a-z0-9-]{1,63}\\.)(xn--)?[a-z0-9]+(-[a-z0-9]+)*\\.)+[a-z]{2,63}\\b"
+                    },
+                    {
+                        name: "Windows file path",
+                        value: "([A-Za-z]):\\\\((?:[A-Za-z\\d][A-Za-z\\d\\- \\x27_\\(\\)~]{0,61}\\\\?)*[A-Za-z\\d][A-Za-z\\d\\- \\x27_\\(\\)]{0,61})(\\.[A-Za-z\\d]{1,6})?"
+                    },
+                    {
+                        name: "UNIX file path",
+                        value: "(?:/[A-Za-z\\d.][A-Za-z\\d\\-.]{0,61})+"
+                    },
+                    {
+                        name: "MAC address",
+                        value: "[A-Fa-f\\d]{2}(?:[:-][A-Fa-f\\d]{2}){5}"
+                    },
+                    {
+                        name: "UUID",
+                        value: "[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}"
+                    },
+                    {
+                        name: "Date (yyyy-mm-dd)",
+                        value: "((?:19|20)\\d\\d)[- /.](0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])"
+                    },
+                    {
+                        name: "Date (dd/mm/yyyy)",
+                        value: "(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.]((?:19|20)\\d\\d)"
+                    },
+                    {
+                        name: "Date (mm/dd/yyyy)",
+                        value: "(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])[- /.]((?:19|20)\\d\\d)"
+                    },
+                    {
+                        name: "Strings",
+                        value: "[A-Za-z\\d/\\-:.,_$%\\x27\"()<>= !\\[\\]{}@]{4,}"
+                    },
+                ],
+                "target": 1
+            },
+            {
+                "name": "Regex",
+                "type": "text",
+                "value": ""
+            },
+            {
+                "name": "Case insensitive",
+                "type": "boolean",
+                "value": true
+            },
+            {
+                "name": "^ and $ match at newlines",
+                "type": "boolean",
+                "value": true
+            },
+            {
+                "name": "Dot matches all",
+                "type": "boolean",
+                "value": false
+            },
+            {
+                "name": "Unicode support",
+                "type": "boolean",
+                "value": false
+            },
+            {
+                "name": "Astral support",
+                "type": "boolean",
+                "value": false
+            },
+            {
+                "name": "Display total",
+                "type": "boolean",
+                "value": false
+            },
+            {
+                "name": "Output format",
+                "type": "option",
+                "value": ["Highlight matches", "List matches", "List capture groups", "List matches with capture groups"]
+            }
+        ];
+    }
+
+    /**
+     * @param {string} input
+     * @param {Object[]} args
+     * @returns {html}
+     */
+    run(input, args) {
+        const [,
+            userRegex,
+            i, m, s, u, a,
+            displayTotal,
+            outputFormat
+        ] = args;
+        let modifiers = "g";
+
+        if (i) modifiers += "i";
+        if (m) modifiers += "m";
+        if (s) modifiers += "s";
+        if (u) modifiers += "u";
+        if (a) modifiers += "A";
+
+        if (userRegex && userRegex !== "^" && userRegex !== "$") {
+            try {
+                const regex = new XRegExp(userRegex, modifiers);
+
+                switch (outputFormat) {
+                    case "Highlight matches":
+                        return regexHighlight(input, regex, displayTotal);
+                    case "List matches":
+                        return Utils.escapeHtml(regexList(input, regex, displayTotal, true, false));
+                    case "List capture groups":
+                        return Utils.escapeHtml(regexList(input, regex, displayTotal, false, true));
+                    case "List matches with capture groups":
+                        return Utils.escapeHtml(regexList(input, regex, displayTotal, true, true));
+                    default:
+                        throw new OperationError("Error: Invalid output format");
+                }
+            } catch (err) {
+                throw new OperationError("Invalid regex. Details: " + err.message);
+            }
+        } else {
+            return Utils.escapeHtml(input);
+        }
+    }
+
+}
+
+/**
+ * Creates a string listing the matches within a string.
+ *
+ * @param {string} input
+ * @param {RegExp} regex
+ * @param {boolean} displayTotal
+ * @param {boolean} matches - Display full match
+ * @param {boolean} captureGroups - Display each of the capture groups separately
+ * @returns {string}
+ */
+function regexList(input, regex, displayTotal, matches, captureGroups) {
+    let output = "",
+        total = 0,
+        match;
+
+    while ((match = regex.exec(input))) {
+        // Moves pointer when an empty string is matched (prevents infinite loop)
+        if (match.index === regex.lastIndex) {
+            regex.lastIndex++;
+        }
+
+        total++;
+        if (matches) {
+            output += match[0] + "\n";
+        }
+        if (captureGroups) {
+            for (let i = 1; i < match.length; i++) {
+                if (matches) {
+                    output += "  Group " + i + ": ";
+                }
+                output += match[i] + "\n";
+            }
+        }
+    }
+
+    if (displayTotal)
+        output = "Total found: " + total + "\n\n" + output;
+
+    return output.slice(0, -1);
+}
+
+/**
+ * Adds HTML highlights to matches within a string.
+ *
+ * @private
+ * @param {string} input
+ * @param {RegExp} regex
+ * @param {boolean} displayTotal
+ * @returns {string}
+ */
+function regexHighlight(input, regex, displayTotal) {
+    let output = "",
+        title = "",
+        hl = 1,
+        total = 0;
+    const captureGroups = [];
+
+    output = input.replace(regex, (match, ...args) => {
+        // The replacer is called with (match, p1, ..., pn, offset, string) and, if the
+        // regex contains named capture groups, a trailing `groups` object (ES2018).
+        // Capture groups are only ever strings or undefined, so an object in the last
+        // position can only be the named groups collection.
+        if (args.length && typeof args[args.length - 1] === "object" && args[args.length - 1] !== null)
+            args.pop(); // Throw away named capture group object
+        args.pop(); // Throw away full string
+        const offset = args.pop(),
+            groups = args;
+
+        // Everything interpolated into the title attribute must be escaped, including
+        // the offset, which is not guaranteed to be a number for all regex engines.
+        title = `Offset: ${Utils.escapeHtml(String(offset))}\n`;
+        if (groups.length) {
+            title += "Groups:\n";
+            for (let i = 0; i < groups.length; i++) {
+                title += `\t${i+1}: ${Utils.escapeHtml(String(groups[i] ?? ""))}\n`;
+            }
+        }
+
+        // Switch highlight
+        hl = hl === 1 ? 2 : 1;
+
+        // Store highlighted match and replace with a placeholder
+        captureGroups.push(`<span class='hl${hl}' title='${title}'>${Utils.escapeHtml(match)}</span>`);
+        return `[cc_capture_group_${total++}]`;
+    });
+
+    // Safely escape all remaining text, then replace placeholders
+    output = Utils.escapeHtml(output);
+    output = output.replace(/\[cc_capture_group_(\d+)\]/g, (_, i) => {
+        return captureGroups[i];
+    });
+
+    if (displayTotal)
+        output = "Total found: " + total + "\n\n" + output;
+
+    return output;
+}
+
+export default RegularExpression;
