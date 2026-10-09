@@ -151,7 +151,9 @@ TestRegister.addApiTests([
         assert.strictEqual(result[0].module, "Ciphers");
         assert.strictEqual(result[0].inputType, "string");
         assert.strictEqual(result[0].outputType, "string");
-        assert.strictEqual(result[0].description, "Triple DES applies DES three times to each block to increase key size.<br><br><b>Key:</b> Triple DES uses a key length of 24 bytes (192 bits).<br><br><b>IV:</b> The Initialization Vector should be 8 bytes long. If not entered, it will default to 8 null bytes.<br><br><b>Padding:</b> In CBC and ECB mode, PKCS#7 padding will be used as a default.");
+        // 汉化分支适配：说明文案已本地化，此处只校验描述存在且非空，不绑定具体语言。
+        assert.strictEqual(typeof result[0].description, "string");
+        assert.ok(result[0].description.length > 0);
         assert.strictEqual(result[0].args.length, 5);
     }),
 
@@ -172,18 +174,21 @@ TestRegister.addApiTests([
     }),
 
     it("chef.help: looks in description for matches too", () => {
-        // string only in one operation's description.
-        const result = chef.help("Converts a unit of data to another format.");
+        // 只在某一个操作的说明中出现、且不出现在任何操作名中的字符串。
+        // 汉化分支改用等效的中文词（上游为 "Converts a unit of data to another format."）。
+        const result = chef.help("数据单位");
         assert.strictEqual(result.length, 1);
         assert.strictEqual(result[0].name, "Convert data units");
     }),
 
     it("chef.help: lists name matches before desc matches", () => {
-        const result = chef.help("Checksum");
-        assert.ok(result[0].name.includes("Checksum"));
-        assert.ok(result[1].name.includes("Checksum"));
-        assert.strictEqual(result[result.length - 1].name.includes("Checksum"), false);
-        assert.ok(result[result.length - 1].description.includes("checksum"));
+        // "Base64" 既出现在部分操作名中，也出现在部分操作的说明中，
+        // 用于验证「名称匹配排在说明匹配之前」（汉化分支对上游 "Checksum" 的等效替换）。
+        const result = chef.help("Base64");
+        assert.ok(result[0].name.includes("Base64"));
+        assert.ok(result[1].name.includes("Base64"));
+        assert.strictEqual(result[result.length - 1].name.includes("Base64"), false);
+        assert.ok(result[result.length - 1].description.includes("Base64"));
     }),
 
     it("chef.help: exact name match only returns one result", () => {

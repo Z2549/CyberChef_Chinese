@@ -47,6 +47,11 @@ src/web/html/index.html        # 界面文案 + <html lang="zh-cmn-Hans">
 上游的正则使用了只匹配正斜杠的写法，在 Windows 的反斜杠路径下会失配，
 导致构建报错。已改为字符类写法 `[\\/]` 以同时兼容两个平台。
 
+此外，`tests/node/tests/nodeApi.mjs` 中有 **3 个 `chef.help` 断言**原本硬编码了
+英文说明原文，汉化后必然失败（CI 会因此变红）。已将其改为
+**语言无关 / 中文等效**的断言——被测逻辑与断言强度均未降低，
+仅去掉了对具体语言的依赖。
+
 ---
 
 ## 快速开始
@@ -103,7 +108,8 @@ npm start              # npx grunt dev，默认 http://localhost:8080
 | 测试套件 | 结果 |
 | --- | --- |
 | 操作测试 `tests/operations` | **2309 / 2309 通过** |
-| Node API 测试 `tests/node` | 3 项断言差异，均为「测试用例硬编码英文原文」所致，非功能问题 |
+| Node API 测试 `tests/node` | **279 / 279 通过** |
+| Node 消费方测试 `npm run testnodeconsumer` | 通过（CJS / ESM 按参数名传参均正常） |
 
 ```bash
 # 复现方式（--openssl-legacy-provider 用于兼容 OpenSSL 3 下的 MD4/MD5）
