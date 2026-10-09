@@ -98,13 +98,17 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
-          body: "See the [CHANGELOG](https://github.com/gchq/CyberChef/blob/master/CHANGELOG.md) and [commit messages](https://github.com/gchq/CyberChef/commits/master) for details."
+          # 汉化分支：不在这里设置 body。上游用它把英文 CHANGELOG 链接写进 Release 正文，
+          # 会覆盖本仓库手工维护的中文发布说明。
 
   npm-publish:
     permissions:
       id-token: write
       contents: read
     needs: main
+    # 汉化分支：上游会把构建产物发布为 npm 包 CyberChef，本仓库没有该包的发布权限，
+    # 每次打 tag 都会留下一个必然失败的 job。仅在官方仓库执行。
+    if: github.repository == 'gchq/CyberChef'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
