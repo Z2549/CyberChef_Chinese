@@ -20,7 +20,7 @@
     font-weight: var(--title-weight);
 }
 
-.category-title[href='#cat收藏'] {
+.category-title[href='#catFavourites'] {
     border-bottom-color: var(--primary-border-colour);
 }
 

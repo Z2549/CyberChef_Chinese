@@ -75,10 +75,18 @@ class ControlsWaiter {
      */
     bakeClick() {
         const btnBake = document.getElementById("bake");
-        if (btnBake.textContent.indexOf("Bake") > 0) {
-            this.app.manager.input.bakeAll();
-        } else if (btnBake.textContent.indexOf("Cancel") > 0) {
-            this.manager.worker.cancelBake(false, true);
+
+        // 汉化改动：原实现通过按钮文案（"Bake" / "Cancel"）判断当前功能，
+        // 文案汉化后两个分支都无法命中，导致点击烘焙按钮变成空操作。
+        // 改为读取由 toggleBakeButtonFunction() 写入的稳定状态标识。
+        switch (btnBake.dataset.bakeFunc || "bake") {
+            case "bake":
+                this.app.manager.input.bakeAll();
+                break;
+            case "cancel":
+                this.manager.worker.cancelBake(false, true);
+                break;
+            // "loading" 状态下保持无操作，与原实现行为一致
         }
     }
 
@@ -514,23 +522,26 @@ ${navigator.userAgent}
         const bakeButton = document.getElementById("bake"),
             btnText = bakeButton.querySelector("span");
 
+        // 记录按钮的当前功能，供 bakeClick() 判断，避免依赖本地化后的文案
+        bakeButton.dataset.bakeFunc = func;
+
         switch (func) {
             case "cancel":
-                btnText.innerText = "Cancel";
+                btnText.innerText = "取消";
                 bakeButton.classList.remove("btn-success");
                 bakeButton.classList.remove("btn-warning");
                 bakeButton.classList.add("btn-danger");
                 break;
             case "loading":
                 bakeButton.style.background = "";
-                btnText.innerText = "Loading...";
+                btnText.innerText = "烘焙中…";
                 bakeButton.classList.remove("btn-success");
                 bakeButton.classList.remove("btn-danger");
                 bakeButton.classList.add("btn-warning");
                 break;
             default:
                 bakeButton.style.background = "";
-                btnText.innerText = "Bake!";
+                btnText.innerText = "烘焙！";
                 bakeButton.classList.remove("btn-danger");
                 bakeButton.classList.remove("btn-warning");
                 bakeButton.classList.add("btn-success");

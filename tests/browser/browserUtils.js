@@ -56,7 +56,10 @@ function bake(browser) {
         .pause(50)
         // Ensure we're not currently busy
         .waitForElementNotVisible("#output-loader", 10000)
-        .expect.element("#bake span").text.to.equal("BAKE!");
+        // 汉化分支适配：Bake 按钮文案已本地化。
+        // 上游为 <span>Bake!</span>（CSS text-transform 渲染成 "BAKE!"），
+        // 由 ControlsWaiter.toggleBakeButtonFunction() 在运行时写入。
+        .expect.element("#bake span").text.to.equal("烘焙！");
 
     browser
         .click("#bake")
