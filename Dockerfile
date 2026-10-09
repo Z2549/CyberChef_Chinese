@@ -4,7 +4,7 @@
 # Modifier --platform=$BUILDPLATFORM limits the platform to "BUILDPLATFORM" during buildx multi-platform builds
 # This is because npm "chromedriver" package is not compatiable with all platforms
 # For more info see: https://docs.docker.com/build/building/multi-platform/#cross-compilation
-FROM --platform=$BUILDPLATFORM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS builder
+FROM --platform=$BUILDPLATFORM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS builder
 
 WORKDIR /app
 
@@ -27,7 +27,7 @@ RUN npm run build
 #########################################
 # Package static build files into nginx #
 #########################################
-FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:9b87ad3dd9f431c733f19dfb278c7eb3dba9dca381942c79818bb42f1a566a83 AS cyberchef
+FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:15c994d10d6d78658721c3bcafff14cb281fba2a4bdf9d5ba92c416a472516e3 AS cyberchef
 
 LABEL maintainer="GCHQ <oss@gchq.gov.uk>"
 
