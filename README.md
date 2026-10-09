@@ -54,8 +54,17 @@ src/web/html/index.html        # 界面文案 + <html lang="zh-cmn-Hans">
 ### 方式一：直接下载（推荐）
 
 前往 [Releases](https://github.com/Z2549/CyberChef_Chinese/releases) 下载
-`CyberChef_v11.5.0.zip`，解压后直接用浏览器打开 `index.html` 即可离线使用，
+`CyberChef_v11.5.0_Chinese.zip`，解压后直接用浏览器打开 `index.html` 即可离线使用，
 无需任何安装。
+
+<details>
+<summary>校验和</summary>
+
+```
+SHA-256  b2fe5e45c1174abfd1d2cc58829c66c7fc383f2334a83136a241c285978cf42f
+```
+
+</details>
 
 ### 方式二：Docker
 
@@ -76,7 +85,7 @@ npm run build          # 等价于 npx grunt prod
 产物位于 `build/prod/`：
 
 - `index.html` —— 可直接双击打开的单页应用
-- `CyberChef_v11.5.0.zip` —— 完整离线包
+- `CyberChef_v11.5.0.zip` —— 完整离线包（Release 中重命名为 `CyberChef_v11.5.0_Chinese.zip`）
 - `assets/`、`modules/`、`images/`
 
 本地开发调试：
